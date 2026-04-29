@@ -1,20 +1,30 @@
 import 'dart:convert';
 
+import 'package:admit_ai/core/models/user_profile.dart';
 import 'package:http/http.dart' as http;
 
 class AiService {
   static const String _apiKey = String.fromEnvironment('OPENROUTER_API_KEY');
 
-  Future<String> sendMessage(String message) async {
+  Future<String> sendMessage(String message, UserProfile profile) async {
     if (_apiKey.isEmpty) {
       return 'OpenRouter API key is missing. Run app with --dart-define=OPENROUTER_API_KEY=your_key';
     }
 
     final uri = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
 
+    final userContext = 
+    '''
+      User profile:
+      - Target country: ${profile.country ?? 'Not selected'}
+      - Goal: ${profile.goal ?? 'Not selected'}
+      - Academic level: ${profile.academicLevel ?? 'Not selected'}
+      - Exams: ${profile.exams.isEmpty ? 'None' : profile.exams.join(', ')}
+    ''';
+
     for (int attempt = 1; attempt <= 3; attempt++) {
       try {
-        final response = await http
+        final response = await http   
             .post(
               uri,
               headers: {
@@ -28,12 +38,29 @@ class AiService {
                 'messages': [
                   {
                     'role': 'system',
-                    'content':
-                        'You are AdmitAI, an admissions assistant. Help students with university admission, exams, motivation letters, recommendation letters, volunteering, projects, and application planning. Answer clearly and practically.',
+                    'content': 
+                    '''
+                      You are AdmitAI, a personal university admissions advisor.
+
+                      Student profile:
+                      - Target country: ${profile.country}
+                      - Goal: ${profile.goal}
+                      - Academic level: ${profile.academicLevel}
+                      - Exams: ${profile.exams.join(', ')}
+
+                      Your task:
+                      Give SPECIFIC, personalized advice based on this profile.
+
+                      Rules:
+                      - Do NOT give generic advice
+                      - Adapt recommendations to the student's situation
+                      - Be practical and clear
+                      - Give step-by-step suggestions
+                    '''
                   },
                   {
                     'role': 'user',
-                    'content': message,
+                    'content': '$userContext\n\nUser question: $message',
                   },
                 ],
               }),

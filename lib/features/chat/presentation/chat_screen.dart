@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/chat_message.dart';
 import 'package:admit_ai/core/services/ai_service.dart';
@@ -43,7 +44,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _controller.clear();
 
-    final response = await _aiService.sendMessage(text);
+    final response = await _aiService.sendMessage(text, widget.userProfile);
 
     setState(() {
       _messages.add(ChatMessage(text: response, isUser: false));
@@ -96,10 +97,38 @@ class _ChatScreenState extends State<ChatScreen> {
                           : Colors.grey.shade300,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      message.text,
-                      style: TextStyle(
-                        color: message.isUser ? Colors.white : Colors.black,
+                    child: MarkdownBody(
+                      data: message.text.replaceAll('<br>', '\n'),
+                      selectable: true,
+                      styleSheet: MarkdownStyleSheet(
+                        p: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                        strong: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        h1: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h2: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        h3: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        listBullet: TextStyle(
+                          color: message.isUser ? Colors.white : Colors.black,
+                          fontSize: 15,
+                        ),
                       ),
                     ),
                   ),
