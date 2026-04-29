@@ -18,8 +18,6 @@ class UniversitiesScreen extends StatefulWidget {
 
 class _UniversitiesScreenState extends State<UniversitiesScreen> {
 
-  int _currentIndex = 0;
-
   @override
   Widget build(BuildContext context) {
 
@@ -47,6 +45,9 @@ class _UniversitiesScreenState extends State<UniversitiesScreen> {
 
           final filtered = allUniversities.where((u) {
             if (widget.userProfile.country == null) return true;
+            if (widget.userProfile.country == 'Europe') {
+              return u.country != 'USA';
+            }
             return u.country == widget.userProfile.country;
           }).toList();
 
@@ -67,41 +68,12 @@ class _UniversitiesScreenState extends State<UniversitiesScreen> {
               if (filtered.isEmpty)
                 const Text('No universities found')
               else ...[
-                SizedBox(
-                  height: 280,
-                  child: PageView.builder(
-                    itemCount: filtered.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-
-                    itemBuilder: (context, index) {
-                      return _UniversityCard(university: filtered[index]);
-                    },
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(filtered.length, (index) {
-                    final isActive = index == _currentIndex;
-
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: isActive ? 18 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isActive ? Colors.blue : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    );
-                  }),
-                ),
+                ...filtered.map((university) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: _UniversityCard(university: university),
+                  );
+                }),
               ],
             ],
           );
@@ -118,6 +90,24 @@ class _UniversityCard extends StatelessWidget {
   const _UniversityCard({
     required this.university,
   });
+
+  String getCurrencySymbol(String country) {
+    switch (country) {
+      case 'USA':
+        return '\$';
+      case 'UK':
+        return '£';
+      case 'Netherlands':
+      case 'Germany':
+      case 'France':
+      case 'Spain':
+        return '€';
+      case 'Switzerland':
+        return 'CHF ';
+      default:
+        return '\$';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -207,10 +197,18 @@ class _UniversityCard extends StatelessWidget {
                     Wrap(
                       spacing: 6,
                       children: [
-                        _InfoChip(label: "IELTS ${university.ielts}"),
-                        _InfoChip(label: "TOEFL ${university.toefl}"),
-                        _InfoChip(label: "Duolingo ${university.duolingo}"),
-                        _InfoChip(label: "💰 ${university.tuition}"),
+                        if (university.duolingo > 0)
+                          _InfoChip(label: "Duolingo ${university.duolingo}"),
+
+                        if (university.ielts > 0)
+                          _InfoChip(label: "IELTS ${university.ielts}"),
+
+                        if (university.toefl > 0)
+                          _InfoChip(label: "TOEFL ${university.toefl}"),
+
+                        _InfoChip(
+                          label: "💰 ${getCurrencySymbol(university.country)}${university.tuition}",
+                        ),
                       ],
                     ),
                   ],

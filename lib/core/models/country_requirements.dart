@@ -25,9 +25,10 @@ const List<CountryRequirements> countryRequirementsList = [
   ),
 
   CountryRequirements(
-    country: 'China',
-    hskRequired: true,
-    hskOptions: ['HSK 4', 'HSK 5', 'HSK 6'],
+    country: 'Europe',
+    englishTestRequired: true,
+    englishTestOptions: ['IELTS', 'TOEFL', 'Duolingo English Test'],
+    satOptional: true,
   ),
 ];
 

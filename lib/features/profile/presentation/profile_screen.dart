@@ -18,9 +18,15 @@ class ProfileScreen extends StatelessWidget {
     int total = 4;
     int completed = 0;
 
-    if (userProfile.country != null) completed++;
-    if (userProfile.goal != null) completed++;
-    if (userProfile.academicLevel != null) completed++;
+    bool isFilled(String? value) {
+      return value != null &&
+        value.trim().isNotEmpty &&
+        value != 'Not selected';
+    }
+
+    if (isFilled(userProfile.country)) completed++;
+    if (isFilled(userProfile.goal)) completed++;
+    if (isFilled(userProfile.academicLevel)) completed++;
     if (userProfile.exams.isNotEmpty) completed++;
 
     return completed / total;
@@ -92,7 +98,7 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     LinearProgressIndicator(value: progress),
                     const SizedBox(height: 8),
-                    Text('${(progress * 100).toInt()}% completed'),
+                    Text('${(progress * 100).round()}% completed'),
                   ],
                 ),
               ),
@@ -198,8 +204,6 @@ class _ProfileInfoTile extends StatelessWidget {
       title: Text(title),
       subtitle: Text(value),
     );
-
-    
   }
 }
 

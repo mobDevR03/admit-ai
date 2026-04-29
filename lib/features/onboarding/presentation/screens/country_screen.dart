@@ -21,7 +21,7 @@ class _CountryScreenState extends State<CountryScreen> {
 
   final List<String> _countries = [
     'USA',
-    'China',
+    'Europe',
   ];
 
   @override

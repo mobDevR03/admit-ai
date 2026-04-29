@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/user_university_service.dart';
 import '../../../core/models/university.dart';
+import '../../../core/utils/currency_utils.dart';
 
 class UniversityDetailScreen extends StatefulWidget {
   final University university;
@@ -144,7 +145,15 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
             const SizedBox(height: 12),
 
             _InfoRow(title: 'City', value: widget.university.city),
-            _InfoRow(title: 'Tuition', value: '\$${widget.university.tuition}/year'),
+            
+            _InfoRow(
+              title: 'Tuition',
+              value: CurrencyUtils.formatTuition(
+                country: widget.university.country,
+                tuition: widget.university.tuition,
+              ),
+            ),
+
             _InfoRow(
               title: 'Acceptance rate',
               value: '${(widget.university.acceptanceRate * 100).toStringAsFixed(0)}%',

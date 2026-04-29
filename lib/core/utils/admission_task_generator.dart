@@ -4,40 +4,69 @@ import '../models/user_profile.dart';
 class AdmissionTaskGenerator {
   static List<AdmissionTask> generate(UserProfile userProfile) {
     final country = userProfile.country;
-    final level = userProfile.level;
+    final level = userProfile.level ?? 'beginner';
+    final exams = userProfile.exams;
+    final goal = userProfile.goal ?? '';
 
+    List<AdmissionTask> tasks = [];
+
+    // ================= USA =================
     if (country == 'USA') {
-
-      if (level == 'beginner') {
-        return [
+      // English exam logic
+      if (!exams.contains('IELTS') &&
+          !exams.contains('TOEFL') &&
+          !exams.contains('Duolingo')) {
+        tasks.add(
           AdmissionTask(
-            title: 'Understand admission process',
-            description: 'Learn how US applications work (Common App, deadlines, requirements).',
+            title: 'Choose English exam',
+            description: 'Select IELTS, TOEFL, or Duolingo for admission.',
             isCompleted: false,
           ),
+        );
+      } else {
+        tasks.add(
           AdmissionTask(
-            title: 'Start English preparation',
-            description: 'Begin IELTS / TOEFL / Duolingo preparation from basics.',
+            title: 'Prepare for English exam',
+            description: 'Reach IELTS 6.5+ / TOEFL 80+ / Duolingo 105+.',
+            isCompleted: false,
+          ),
+        );
+      }
+
+      // SAT logic
+      if (exams.contains('SAT')) {
+        tasks.add(
+          AdmissionTask(
+            title: 'Prepare for SAT',
+            description: 'Focus on Math and Evidence-Based Reading.',
+            isCompleted: false,
+          ),
+        );
+      }
+
+      // Level-based tasks
+      if (level == 'beginner') {
+        tasks.addAll([
+          AdmissionTask(
+            title: 'Understand US admissions',
+            description: 'Learn Common App, deadlines, requirements.',
             isCompleted: false,
           ),
           AdmissionTask(
             title: 'Explore universities',
-            description: 'Find universities that match your level and interests.',
+            description: 'Find programs that match your goals.',
             isCompleted: false,
           ),
-        ];
+        ]);
       }
 
       if (level == 'intermediate') {
-        return [
+        tasks.addAll([
           AdmissionTask(
-            title: 'Prepare for English exam',
-            description: 'Reach IELTS 6.5+, TOEFL 80+, or Duolingo 105+.',
-            isCompleted: false,
-          ),
-          AdmissionTask(
-            title: 'Build project portfolio',
-            description: 'Add 1–2 strong projects with GitHub.',
+            title: 'Build portfolio',
+            description: goal == 'Engineering'
+                ? 'Create 1–2 technical projects (GitHub).'
+                : 'Build relevant projects or activities.',
             isCompleted: false,
           ),
           AdmissionTask(
@@ -45,19 +74,19 @@ class AdmissionTaskGenerator {
             description: 'Select 5–10 universities to apply.',
             isCompleted: false,
           ),
-        ];
+        ]);
       }
 
       if (level == 'advanced') {
-        return [
+        tasks.addAll([
           AdmissionTask(
-            title: 'Write strong application essays',
-            description: 'Finalize Common App essay and supplements.',
+            title: 'Write essays',
+            description: 'Prepare Common App personal statement.',
             isCompleted: false,
           ),
           AdmissionTask(
-            title: 'Collect all documents',
-            description: 'Transcript, recommendations, certificates.',
+            title: 'Collect documents',
+            description: 'Transcripts, recommendations, certificates.',
             isCompleted: false,
           ),
           AdmissionTask(
@@ -65,60 +94,37 @@ class AdmissionTaskGenerator {
             description: 'Apply before deadlines.',
             isCompleted: false,
           ),
-        ];
+        ]);
       }
 
-      return [
-        AdmissionTask(
-          title: 'Prepare for English exam',
-          description: 'IELTS / TOEFL required.',
-          isCompleted: false,
-        ),
-      ];
+      return tasks;
     }
 
+    // ================= CHINA =================
     if (country == 'China') {
-      return const [
+      tasks.addAll([
         AdmissionTask(
           title: 'Prepare for HSK',
           description: 'Reach HSK 4–5 level.',
           isCompleted: false,
         ),
         AdmissionTask(
-          title: 'Research scholarships',
-          description: 'CSC and university scholarships.',
+          title: 'Choose universities',
+          description: 'Focus on CSC scholarship programs.',
           isCompleted: false,
         ),
         AdmissionTask(
           title: 'Prepare documents',
-          description: 'Transcripts, passport, recommendation.',
+          description: 'Passport, transcripts, recommendation letters.',
           isCompleted: false,
         ),
-      ];
+      ]);
+
+      return tasks;
     }
 
-    if (country == 'Germany') {
-      return const [
-        AdmissionTask(
-          title: 'Learn German / English',
-          description: 'B2–C1 level required.',
-          isCompleted: false,
-        ),
-        AdmissionTask(
-          title: 'Prepare blocked account',
-          description: 'Financial proof for visa.',
-          isCompleted: false,
-        ),
-        AdmissionTask(
-          title: 'Apply via UniAssist',
-          description: 'Submit documents to universities.',
-          isCompleted: false,
-        ),
-      ];
-    }
-
-    // default fallback
-    return const [
+    // ================= DEFAULT =================
+    return [
       AdmissionTask(
         title: 'Research universities',
         description: 'Find programs that match your goals.',
