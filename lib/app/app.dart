@@ -6,6 +6,7 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
 import '../features/universities/presentation/universities_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../core/theme/app_theme.dart';
 
 class AdmitAIApp extends StatelessWidget {
   const AdmitAIApp({super.key});
@@ -15,10 +16,7 @@ class AdmitAIApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AdmitAI',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blue,
-      ),
+      theme: AppTheme.light,
       home: const OnboardingFlow(),
     );
   }

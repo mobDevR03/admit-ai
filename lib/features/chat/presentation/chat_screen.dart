@@ -3,6 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/chat_message.dart';
 import 'package:admit_ai/core/services/ai_service.dart';
+import 'package:admit_ai/core/theme/app_theme.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserProfile userProfile;
@@ -93,42 +94,25 @@ class _ChatScreenState extends State<ChatScreen> {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: message.isUser
-                          ? Colors.blue
-                          : Colors.grey.shade300,
-                      borderRadius: BorderRadius.circular(12),
+                          ? AppColors.primary
+                          : AppColors.card,
+                      borderRadius: BorderRadius.circular(AppRadius.card),
                     ),
                     child: MarkdownBody(
                       data: message.text.replaceAll('<br>', '\n'),
                       selectable: true,
                       styleSheet: MarkdownStyleSheet(
-                        p: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
-                          fontSize: 15,
-                          height: 1.35,
+                        p: AppTextStyles.body.copyWith(
+                          color: message.isUser ? Colors.white : AppColors.text,
                         ),
-                        strong: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
+                        strong: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w700,
+                          color: message.isUser ? Colors.white : AppColors.text,
                         ),
-                        h1: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        h2: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        h3: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        listBullet: TextStyle(
-                          color: message.isUser ? Colors.white : Colors.black,
-                          fontSize: 15,
-                        ),
+                        h1: AppTextStyles.cardTitle,
+                        h2: AppTextStyles.cardTitle,
+                        h3: AppTextStyles.body,
+                        listBullet: AppTextStyles.body,
                       ),
                     ),
                   ),
