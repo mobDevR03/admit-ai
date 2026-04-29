@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/chat_message.dart';
-import '../../../core/services/fake_ai_service.dart';
+import 'package:admit_ai/core/services/ai_service.dart';
 
 class ChatScreen extends StatefulWidget {
   final UserProfile userProfile;
@@ -17,6 +16,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final List<ChatMessage> _messages = [];
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _controller = TextEditingController();
+  final AiService _aiService = AiService();
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async{
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
@@ -43,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _controller.clear();
 
-    final response = FakeAIService.getResponse(text, widget.userProfile);
+    final response = await _aiService.sendMessage(text);
 
     setState(() {
       _messages.add(ChatMessage(text: response, isUser: false));
