@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../core/services/user_profile_service.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/admission_task.dart';
 import '../../../core/utils/admission_task_generator.dart';
@@ -17,28 +17,62 @@ class RoadmapScreen extends StatefulWidget {
 }
 
 class _RoadmapScreenState extends State<RoadmapScreen> {
-  late List<AdmissionTask> _tasks;
+  List<AdmissionTask> _tasks = [];
+  final UserProfileService _profileService = UserProfileService();
+  final String _userId = 'test_user';
 
   @override
   void initState() {
     super.initState();
-    _tasks = AdmissionTaskGenerator.generate(widget.userProfile);
+    _loadTasks();
   }
 
-  void _toggleTask(int index) {
-    setState(() {
-      final task = _tasks[index];
+  Future<void> _loadTasks() async {
+    final generatedTasks = AdmissionTaskGenerator.generate(widget.userProfile);
 
+    final completedTaskTitles = await _profileService.loadCompletedTasks(
+      userId: _userId,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _tasks = generatedTasks.map((task) {
+        return AdmissionTask(
+          title: task.title,
+          description: task.description,
+          isCompleted: completedTaskTitles.contains(task.title),
+        );
+      }).toList();
+    });
+  }
+
+  Future<void> _toggleTask(int index) async {
+    final task = _tasks[index];
+
+    setState(() {
       _tasks[index] = AdmissionTask(
         title: task.title,
         description: task.description,
         isCompleted: !task.isCompleted,
       );
     });
+
+    final completedTasks = _tasks
+        .where((task) => task.isCompleted)
+        .map((task) => task.title)
+        .toList();
+
+    await _profileService.saveCompletedTasks(
+      userId: _userId,
+      completedTasks: completedTasks,
+    );
   }
 
   double get _progress {
-    final completed = _tasks.where((t) => t.isCompleted).length;
+    if (_tasks.isEmpty) return 0;
+
+    final completed = _tasks.where((task) => task.isCompleted).length;
     return completed / _tasks.length;
   }
 
@@ -61,11 +95,20 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
             ),
           ),
 
+          const SizedBox(height: 8),
+
+          Text(
+            'Personalized by your level and exams',
+            style: TextStyle(
+              color: Colors.grey.shade700,
+            ),
+          ),
+
           const SizedBox(height: 20),
 
           LinearProgressIndicator(value: _progress),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
 
           Text('$percent% completed'),
 
@@ -77,15 +120,25 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
 
             return Card(
               margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
                 onTap: () => _toggleTask(index),
-                leading: Icon(
-                  task.isCompleted
-                      ? Icons.check_circle
-                      : Icons.radio_button_unchecked,
+                child: ListTile(
+                  leading: Icon(
+                    task.isCompleted
+                        ? Icons.check_circle
+                        : Icons.radio_button_unchecked,
+                  ),
+                  title: Text(
+                    task.title,
+                    style: TextStyle(
+                      decoration: task.isCompleted
+                          ? TextDecoration.lineThrough
+                          : TextDecoration.none,
+                    ),
+                  ),
+                  subtitle: Text(task.description),
                 ),
-                title: Text(task.title),
-                subtitle: Text(task.description),
               ),
             );
           }),
@@ -94,3 +147,4 @@ class _RoadmapScreenState extends State<RoadmapScreen> {
     );
   }
 }
+

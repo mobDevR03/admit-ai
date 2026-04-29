@@ -6,6 +6,7 @@ import '../../../core/models/admission_task.dart';
 import '/level_test/level_test_screen.dart';
 import '/level_test/level_test_result.dart';
 import '/core/services/user_profile_service.dart';
+import '../../chat/presentation/chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserProfile userProfile;
@@ -20,13 +21,42 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final UserProfileService _profileService = UserProfileService();
+  final String _userId = 'test_user';
+
+  List<AdmissionTask> _tasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final generatedTasks = AdmissionTaskGenerator.generate(widget.userProfile);
+
+    final completedTaskTitles = await _profileService.loadCompletedTasks(
+      userId: _userId,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _tasks = generatedTasks.map((task) {
+        return AdmissionTask(
+          title: task.title,
+          description: task.description,
+          isCompleted: completedTaskTitles.contains(task.title),
+        );
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
 
-    final tasks = AdmissionTaskGenerator.generate(widget.userProfile);
-    final completedTasks = tasks.where((task) => task.isCompleted).length;
-    final progress = completedTasks / tasks.length;
+    final completedTasks = _tasks.where((task) => task.isCompleted).length;
+    final progress = _tasks.isEmpty ? 0.0 : completedTasks / _tasks.length;
     final progressPercent = (progress * 100).toInt();
 
     return Scaffold(
@@ -41,6 +71,29 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+          
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, size: 32),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Your AI-powered admission plan is personalized by your level, goal, and exams.',
+                      style: TextStyle(
+                        color: Colors.grey.shade800,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
 
@@ -65,20 +118,74 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
+          const SizedBox(height: 20),
+
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Need help with your plan?',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Ask AI to explain your roadmap, recommend universities, or improve your application strategy.',
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatScreen(userProfile: widget.userProfile),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text('Ask AI about my plan'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            'Based on your level ${widget.userProfile.academicLevel ?? 'not determined'} and goal ${widget.userProfile.goal ?? 'study abroad'}',
+            style: TextStyle(
+              color: Colors.grey.shade700,
+            ),
+          ),
+
           const SizedBox(height: 12),
 
-          ...tasks.take(2).map((task) => _TaskTile(task: task)),
+          ..._tasks.take(4).map((task) => _TaskTile(task: task)),
 
           const SizedBox(height: 10),
 
           TextButton(
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => RoadmapScreen(userProfile: widget.userProfile),
                 ),
               );
+
+              await _loadTasks();
             },
             child: const Text('See full plan'),
           ),
@@ -194,7 +301,15 @@ class _ProgressCard extends StatelessWidget {
             const SizedBox(height: 10),
             LinearProgressIndicator(value: progress),
             const SizedBox(height: 6),
-            Text('$percent% completed'),
+            Text(
+              percent == 0
+                  ? 'Start your journey 🚀'
+                  : percent < 50
+                      ? 'You’re making progress 💪 ($percent%)'
+                      : percent < 100
+                          ? 'Almost there 🔥 ($percent%)'
+                          : 'Ready to apply 🎯',
+            ),
           ],
         ),
       ),
