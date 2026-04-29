@@ -7,7 +7,7 @@ class AiService {
 
   Future<String> sendMessage(String message) async {
     if (_apiKey.isEmpty) {
-      return 'OpenRouter API key is missing. Run app with --dart-define=OPENROUTER_API_KEY=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';
+      return 'OpenRouter API key is missing. Run app with --dart-define=OPENROUTER_API_KEY=your_key';
     }
 
     final uri = Uri.parse('https://openrouter.ai/api/v1/chat/completions');
@@ -53,6 +53,18 @@ class AiService {
             response.statusCode == 503) {
           await Future.delayed(Duration(seconds: attempt * 2));
           continue;
+        }
+
+        if (response.statusCode == 401) {
+          return 'AI authorization failed. Check your OpenRouter API key.';
+        }
+
+        if (response.statusCode == 402) {
+          return 'OpenRouter balance or free limit issue. Check your OpenRouter account.';
+        }
+
+        if (response.statusCode == 404) {
+          return 'AI model not found. Check selected OpenRouter model.';
         }
 
         return 'AI error: ${response.statusCode}';
