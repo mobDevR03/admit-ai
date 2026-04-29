@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import '../../roadmap/presentation/roadmap_screen.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/models/admission_task.dart';
+import '/level_test/level_test_screen.dart';
+import '/level_test/level_test_result.dart';
+import '/core/services/user_profile_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final UserProfile userProfile;
 
   const HomeScreen({
@@ -13,9 +16,15 @@ class HomeScreen extends StatelessWidget {
   });
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  @override
   Widget build(BuildContext context) {
 
-    final tasks = AdmissionTaskGenerator.generate(userProfile);
+    final tasks = AdmissionTaskGenerator.generate(widget.userProfile);
     final completedTasks = tasks.where((task) => task.isCompleted).length;
     final progress = completedTasks / tasks.length;
     final progressPercent = (progress * 100).toInt();
@@ -37,7 +46,7 @@ class HomeScreen extends StatelessWidget {
 
           const SizedBox(height: 20),
 
-          _TargetCard(userProfile: userProfile),
+          _TargetCard(userProfile: widget.userProfile),
 
           const SizedBox(height: 20),
 
@@ -67,7 +76,7 @@ class HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => RoadmapScreen(userProfile: userProfile),
+                  builder: (_) => RoadmapScreen(userProfile: widget.userProfile),
                 ),
               );
             },
@@ -79,7 +88,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _TargetCard extends StatelessWidget {
+class _TargetCard extends StatefulWidget {
   final UserProfile userProfile;
 
   const _TargetCard({
@@ -87,21 +96,71 @@ class _TargetCard extends StatelessWidget {
   });
 
   @override
+  State<_TargetCard> createState() => _TargetCardState();
+}
+
+class _TargetCardState extends State<_TargetCard> {
+  String? _level;
+
+  @override
+  void initState() {
+    super.initState();
+    _level = widget.userProfile.academicLevel;
+  }
+
+  Future<void> _openLevelTest(BuildContext context) async {
+    final result = await Navigator.push<LevelTestResult>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LevelTestScreen(),
+      ),
+    );
+
+    if (result == null) return;
+
+    final userId = 'test_user';
+
+    await UserProfileService().updateLevel(
+      userId: userId,
+      level: result.level,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _level = result.level;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Level saved: ${result.level}'),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final exams = userProfile.exams.isEmpty
+    final exams = widget.userProfile.exams.isEmpty
         ? 'Not selected'
-        : userProfile.exams.join(', ');
+        : widget.userProfile.exams.join(', ');
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _RowItem(Icons.public, 'Country', userProfile.country ?? '-'),
+            _RowItem(Icons.public, 'Country', widget.userProfile.country ?? '-'),
             const SizedBox(height: 10),
-            _RowItem(Icons.flag, 'Goal', userProfile.goal ?? '-'),
+            _RowItem(Icons.flag, 'Goal', widget.userProfile.goal ?? '-'),
             const SizedBox(height: 10),
-            _RowItem(Icons.school, 'Level', userProfile.academicLevel ?? '-'),
+            _level == null || _level!.isEmpty
+                ? _ActionRowItem(
+                    icon: Icons.school,
+                    label: 'Level',
+                    actionText: 'Take test',
+                    onTap: () => _openLevelTest(context),
+                  )
+                : _RowItem(Icons.school, 'Level', _level!),
             const SizedBox(height: 10),
             _RowItem(Icons.assignment, 'Exams', exams),
           ],
@@ -186,6 +245,36 @@ class _RowItem extends StatelessWidget {
             textAlign: TextAlign.right,
             overflow: TextOverflow.ellipsis,
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ActionRowItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String actionText;
+  final VoidCallback onTap;
+
+  const _ActionRowItem({
+    required this.icon,
+    required this.label,
+    required this.actionText,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(width: 10),
+        Text(label),
+        const Spacer(),
+        TextButton(
+          onPressed: onTap,
+          child: Text(actionText),
         ),
       ],
     );
