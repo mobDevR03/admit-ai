@@ -53,7 +53,7 @@ AdmitAI simplifies the admission journey by providing a structured platform for 
 ![Profile 2](assets/screenshots/profileScreen_2.png)
 
 ## Demo
-(coming soon)
+[Watch Demo](https://youtube.com/shorts/fpsyzEJ_XSc?feature=share)
 
 ## My Role
 I independently designed and developed the full mobile application, including UI/UX, Firebase backend integration, admission logic, and AI-related features.
