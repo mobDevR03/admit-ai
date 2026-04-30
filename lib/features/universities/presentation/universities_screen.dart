@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../../core/widgets/university_image.dart'; 
 import '../../../core/models/university.dart';
 import '../../../core/models/user_profile.dart';
 import '../../../core/services/university_service.dart';
@@ -131,9 +131,8 @@ class _UniversityCard extends StatelessWidget {
           child: Stack(
             children: [
               Positioned.fill(
-                child: Image.network(
-                  university.imageUrl,
-                  fit: BoxFit.cover,
+                child: UniversityImage(
+                  imageUrl: university.imageUrl,
                 ),
               ),
 

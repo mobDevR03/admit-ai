@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../onboarding/presentation/onboarding_flow.dart';
-import '../../../core/models/user_profile.dart';
 
-class ProfileScreen extends StatelessWidget {
+import 'package:admit_ai/core/models/admission_task.dart';
+import 'package:admit_ai/core/models/user_profile.dart';
+import 'package:admit_ai/core/services/user_profile_service.dart';
+import 'package:admit_ai/core/utils/admission_task_generator.dart';
+import 'package:admit_ai/features/onboarding/presentation/onboarding_flow.dart';
+
+class ProfileScreen extends StatefulWidget {
   final UserProfile userProfile;
   final VoidCallback onOpenPlan;
   final VoidCallback onOpenChat;
@@ -10,31 +14,64 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
     super.key,
     required this.userProfile,
-    required this.onOpenChat,
     required this.onOpenPlan,
+    required this.onOpenChat,
   });
 
-  double _calculateProgress() {
-    int total = 4;
-    int completed = 0;
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
 
-    bool isFilled(String? value) {
-      return value != null &&
-          value.trim().isNotEmpty &&
-          value != 'Not selected';
+class _ProfileScreenState extends State<ProfileScreen> {
+  final UserProfileService _profileService = UserProfileService();
+  final String _userId = 'test_user';
+
+  List<AdmissionTask> _tasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.userProfile != widget.userProfile) {
+      _loadTasks();
     }
+  }
 
-    if (isFilled(userProfile.country)) completed++;
-    if (isFilled(userProfile.goal)) completed++;
-    if (isFilled(userProfile.academicLevel)) completed++;
-    if (userProfile.exams.isNotEmpty) completed++;
+  Future<void> _loadTasks() async {
+    final generatedTasks = AdmissionTaskGenerator.generate(widget.userProfile);
 
-    return completed / total;
+    final completedTasks = await _profileService.loadCompletedTasks(
+      userId: _userId,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _tasks = generatedTasks.map((task) {
+        return AdmissionTask(
+          title: task.title,
+          description: task.description,
+          isCompleted: completedTasks.contains(task.title),
+        );
+      }).toList();
+    });
+  }
+
+  double _calculateProgress() {
+    final completed = _tasks.where((task) => task.isCompleted).length;
+    return _tasks.isEmpty ? 0.0 : completed / _tasks.length;
   }
 
   @override
   Widget build(BuildContext context) {
     final progress = _calculateProgress();
+    final percent = (progress * 100).toInt();
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile')),
@@ -47,13 +84,17 @@ class ProfileScreen extends StatelessWidget {
                 CircleAvatar(
                   radius: 40,
                   backgroundColor: Colors.blue.shade100,
-                  child: const Icon(Icons.person, size: 40, color: Colors.blue),
+                  child: const Icon(
+                    Icons.person,
+                    size: 40,
+                    color: Colors.blue,
+                  ),
                 ),
 
                 const SizedBox(height: 12),
 
                 Text(
-                  '${userProfile.country ?? 'No country'} • ${userProfile.goal ?? 'No goal'}',
+                  '${widget.userProfile.country ?? 'No country'} • ${widget.userProfile.goal ?? 'No goal'}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -64,7 +105,10 @@ class ProfileScreen extends StatelessWidget {
 
                 const Text(
                   'Your personalized admission journey',
-                  style: TextStyle(fontSize: 14, color: Colors.black54),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.black54,
+                  ),
                 ),
 
                 const SizedBox(height: 16),
@@ -74,8 +118,11 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 6),
 
                 Text(
-                  '${(progress * 100).toInt()}% completed',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  '$percent% completed',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
               ],
             ),
@@ -92,24 +139,24 @@ class ProfileScreen extends StatelessWidget {
                   _ProfileInfoTile(
                     icon: Icons.public,
                     title: 'Target Country',
-                    value: userProfile.country ?? 'Not selected',
+                    value: widget.userProfile.country ?? 'Not selected',
                   ),
                   _ProfileInfoTile(
                     icon: Icons.flag,
                     title: 'Goal',
-                    value: userProfile.goal ?? 'Not selected',
+                    value: widget.userProfile.goal ?? 'Not selected',
                   ),
                   _ProfileInfoTile(
                     icon: Icons.school,
                     title: 'Academic Level',
-                    value: userProfile.academicLevel ?? 'Not selected',
+                    value: widget.userProfile.academicLevel ?? 'Not selected',
                   ),
                   _ProfileInfoTile(
                     icon: Icons.assignment,
                     title: 'Exams',
-                    value: userProfile.exams.isEmpty
+                    value: widget.userProfile.exams.isEmpty
                         ? 'Not selected'
-                        : userProfile.exams.join(', '),
+                        : widget.userProfile.exams.join(', '),
                   ),
                 ],
               ),
@@ -132,23 +179,26 @@ class ProfileScreen extends StatelessWidget {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              OnboardingFlow(existingProfile: userProfile),
+                          builder: (_) => OnboardingFlow(
+                            existingProfile: widget.userProfile,
+                          ),
                         ),
                       );
+
+                      await _loadTasks();
                     },
                   ),
                   ListTile(
                     leading: const Icon(Icons.auto_awesome),
                     title: const Text('My Plan'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: onOpenPlan,
+                    onTap: widget.onOpenPlan,
                   ),
                   ListTile(
                     leading: const Icon(Icons.smart_toy),
                     title: const Text('Ask AI Advisor'),
                     trailing: const Icon(Icons.chevron_right),
-                    onTap: onOpenChat,
+                    onTap: widget.onOpenChat,
                   ),
                 ],
               ),
