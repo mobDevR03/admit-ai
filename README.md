@@ -1,4 +1,4 @@
-# AdmitAI — AI-Powered Admission Assistant
+# AdmitAI — AI-Powered University Admission Assistant
 
 AI-powered admission assistant that helps students explore universities, track admission progress, and receive personalized guidance.
 
