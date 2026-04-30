@@ -1,16 +1,30 @@
-# admit_ai
+# AdmitAI
 
-A new Flutter project.
+AI-powered admission assistant that helps students explore universities, track admission progress, and receive personalized guidance.
 
-## Getting Started
+## Problem
+International students often struggle with understanding university requirements, exams, and admission processes.
 
-This project is a starting point for a Flutter application.
+## Solution
+AdmitAI simplifies the admission journey by providing a structured platform for university discovery, progress tracking, and AI-based assistance.
 
-A few resources to get you started if this is your first Flutter project:
+## Features
+- University search with filters (country, exams)
+- Admission progress tracking
+- AI-powered assistant chat
+- Personalized recommendations
+- Clean mobile UI
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Tech Stack
+- Flutter (Dart)
+- Firebase (Firestore, Auth)
+- GitHub
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Screenshots
+(coming soon)
+
+## Demo
+(coming soon)
+
+## My Role
+I designed and developed the full application, including UI, Firebase integration, and core logic.
