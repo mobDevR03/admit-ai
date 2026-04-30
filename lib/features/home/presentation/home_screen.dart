@@ -115,28 +115,57 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _TargetCard extends StatelessWidget {
+class _TargetCard extends StatefulWidget {
   final UserProfile userProfile;
 
   const _TargetCard({required this.userProfile});
 
   @override
+  State<_TargetCard> createState() => _TargetCardState();
+}
+
+class _TargetCardState extends State<_TargetCard> {
+  String? _academicLevel;
+
+  @override
+  void initState() {
+    super.initState();
+    _academicLevel = widget.userProfile.academicLevel;
+  }
+
+  Future<void> _openLevelTest() async {
+    final result = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const LevelTestScreen(),
+      ),
+    );
+
+    if (result == null) return;
+
+    setState(() {
+      _academicLevel = result;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final exams = userProfile.exams.isEmpty
+    final exams = widget.userProfile.exams.isEmpty
         ? 'Not selected'
-        : userProfile.exams.join(', ');
+        : widget.userProfile.exams.join(', ');
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _RowItem(Icons.public, 'Country', userProfile.country ?? '-'),
-            _RowItem(Icons.flag, 'Goal', userProfile.goal ?? '-'),
+            _RowItem(Icons.public, 'Country', widget.userProfile.country ?? '-'),
+            _RowItem(Icons.flag, 'Goal', widget.userProfile.goal ?? '-'),
             _RowItem(
               Icons.school,
               'Level',
-              userProfile.academicLevel ?? 'Take test',
+              _academicLevel ?? 'Take test',
+              onTap: _academicLevel == null ? _openLevelTest : null,
             ),
             _RowItem(Icons.assignment, 'Exams', exams),
           ],
@@ -198,18 +227,38 @@ class _RowItem extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
-  const _RowItem(this.icon, this.label, this.value);
+  const _RowItem(
+    this.icon,
+    this.label,
+    this.value, {
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final valueWidget = Text(
+      value,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: onTap != null ? Colors.deepPurple : Colors.black,
+        fontWeight: onTap != null ? FontWeight.w600 : FontWeight.normal,
+      ),
+    );
+
     return Row(
       children: [
         Icon(icon, size: 20),
         const SizedBox(width: 10),
         Text(label),
         const Spacer(),
-        Text(value, overflow: TextOverflow.ellipsis),
+        onTap == null
+            ? valueWidget
+            : GestureDetector(
+                onTap: onTap,
+                child: valueWidget,
+              ),
       ],
     );
   }
