@@ -1,6 +1,8 @@
-# AdmitAI
+# AdmitAI — AI-Powered Admission Assistant
 
 AI-powered admission assistant that helps students explore universities, track admission progress, and receive personalized guidance.
+
+Helps international students navigate university admissions, requirements, and decision-making with structured guidance and AI assistance.
 
 ## Problem
 International students often struggle with understanding university requirements, exams, and admission processes.
@@ -21,6 +23,12 @@ AdmitAI simplifies the admission journey by providing a structured platform for 
 - GitHub
 
 ## Screenshots
+
+<p align="center">
+  <img src="assets/screenshots/homeScreen_1.png" width="250"/>
+  <img src="assets/screenshots/universitiesScreen.png" width="250"/>
+  <img src="assets/screenshots/AIChatScreen.png" width="250"/>
+</p>
 
 ### Home
 ![Home 1](assets/screenshots/homeScreen_1.png)
@@ -48,4 +56,7 @@ AdmitAI simplifies the admission journey by providing a structured platform for 
 (coming soon)
 
 ## My Role
-I designed and developed the full application, including UI, Firebase integration, and core logic.
+I independently designed and developed the full mobile application, including UI/UX, Firebase backend integration, admission logic, and AI-related features.
+
+## Project Goal
+This project reflects my interest in building technology that simplifies complex real-world processes and helps people make informed decisions about their future.
