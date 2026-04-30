@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../core/services/user_university_service.dart';
 import '../../../core/models/university.dart';
 import '../../../core/utils/currency_utils.dart';
+import '../../../core/models/user_profile.dart';
 
 class UniversityDetailScreen extends StatefulWidget {
+  final UserProfile userProfile;
   final University university;
 
   const UniversityDetailScreen({
     super.key,
     required this.university,
+    required this.userProfile,
   });
 
   @override
@@ -21,6 +24,28 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
   bool _isSaved = false;
   bool _isLoading = true;
+
+  String _buildUniversityDescription() {
+    final exams = widget.userProfile.exams;
+
+    final hasDuolingo = exams.contains('Duolingo');
+    final hasIelts = exams.contains('IELTS');
+    final hasToefl = exams.contains('TOEFL');
+
+    if (hasDuolingo && widget.university.duolingo <= 105) {
+      return '${widget.university.name} may be a good match because it accepts Duolingo and its listed requirement is reachable for many applicants.';
+    }
+
+    if (hasIelts && widget.university.ielts <= 6.5) {
+      return '${widget.university.name} may be a good match because it accepts IELTS and the listed IELTS requirement is moderate.';
+    }
+
+    if (hasToefl && widget.university.toefl <= 80) {
+      return '${widget.university.name} may be a good match because it accepts TOEFL and the listed TOEFL requirement is moderate.';
+    }
+
+    return '${widget.university.name} can still be considered, but you should compare its English test requirements with your current exam plan before adding it to your final shortlist.';
+  }
 
   @override
   void initState() {
@@ -170,9 +195,9 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
             const SizedBox(height: 10),
 
-            const Text(
-              'This is one of the recommended universities. More detailed information will be added later.',
-              style: TextStyle(fontSize: 15),
+            Text(
+              _buildUniversityDescription(),
+              style: const TextStyle(fontSize: 15),
             ),
 
             const SizedBox(height: 40),

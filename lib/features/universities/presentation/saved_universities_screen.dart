@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import '../../../core/models/user_profile.dart';
 import '../../../core/models/university.dart';
 import 'university_detail_screen.dart';
 
@@ -89,7 +89,16 @@ class SavedUniversitiesScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
-                              UniversityDetailScreen(university: u),
+                            UniversityDetailScreen(
+                              university: u,
+                              userProfile: UserProfile(
+                                country: 'USA',
+                                goal: 'CS',
+                                academicLevel: 'Not selected',
+                                level: 'Not selected',
+                                exams: ['IELTS', 'SAT'],
+                              ),
+                            )
                         ),
                       );
                     },

@@ -269,7 +269,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
       appBar: AppBar(
         title: const Text('Level test'),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,6 +287,7 @@ class _LevelTestScreenState extends State<LevelTestScreen> {
               question.text,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
+                    height: 1.25,
                   ),
             ),
             const SizedBox(height: 28),

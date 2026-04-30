@@ -118,7 +118,14 @@ class _UniversityCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => UniversityDetailScreen(
               university: university,
-            ),
+              userProfile: UserProfile(
+                country: 'USA',
+                goal: 'CS',
+                academicLevel: 'Not selected',
+                level: 'Not selected',
+                exams: ['IELTS', 'SAT'],
+              ),
+            )
           ),
         );
       },
