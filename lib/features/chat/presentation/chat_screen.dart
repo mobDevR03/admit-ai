@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import '../../../core/models/user_profile.dart';
-import '../../../core/models/chat_message.dart';
+import 'package:admit_ai/core/models/user_profile.dart';
+import 'package:admit_ai/core/models/chat_message.dart';
 import 'package:admit_ai/core/services/ai_service.dart';
 import 'package:admit_ai/core/theme/app_theme.dart';
 
@@ -20,35 +20,44 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final AiService _aiService = AiService();
 
+  bool _isSending = false;
+
   @override
   void initState() {
     super.initState();
 
     _messages.add(
       ChatMessage(
-        text:
-            'Hi! I am your AdmitAI assistant. Ask me about your plan or exams.',
+        text: 'Hi! I am your AdmitAI assistant. Ask me about your plan or exams.',
         isUser: false,
       ),
     );
   }
 
-  Future<void> _sendMessage() async{
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
-    if (text.isEmpty) return;
+    if (text.isEmpty || _isSending) return;
 
     setState(() {
       _messages.add(ChatMessage(text: text, isUser: true));
+      _isSending = true;
     });
 
     _scrollToBottom();
-
     _controller.clear();
 
     final response = await _aiService.sendMessage(text, widget.userProfile);
 
     setState(() {
       _messages.add(ChatMessage(text: response, isUser: false));
+      _isSending = false;
     });
 
     _scrollToBottom();
@@ -73,7 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(  
+    return Scaffold(
       appBar: AppBar(title: const Text('AI Assistant')),
       body: Column(
         children: [
@@ -96,18 +105,23 @@ class _ChatScreenState extends State<ChatScreen> {
                       color: message.isUser
                           ? AppColors.primary
                           : AppColors.card,
-                      borderRadius: BorderRadius.circular(AppRadius.card),
+                      borderRadius:
+                          BorderRadius.circular(AppRadius.card),
                     ),
                     child: MarkdownBody(
                       data: message.text.replaceAll('<br>', '\n'),
                       selectable: true,
                       styleSheet: MarkdownStyleSheet(
                         p: AppTextStyles.body.copyWith(
-                          color: message.isUser ? Colors.white : AppColors.text,
+                          color: message.isUser
+                              ? Colors.white
+                              : AppColors.text,
                         ),
                         strong: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: message.isUser ? Colors.white : AppColors.text,
+                          color: message.isUser
+                              ? Colors.white
+                              : AppColors.text,
                         ),
                         h1: AppTextStyles.cardTitle,
                         h2: AppTextStyles.cardTitle,
@@ -121,7 +135,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
 
-          if (_messages.isEmpty)
+          if (_messages.length == 1)
             Padding(
               padding: const EdgeInsets.all(12),
               child: Wrap(
@@ -156,7 +170,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: _sendMessage,
+                  onPressed: _isSending ? null : _sendMessage,
                   icon: const Icon(Icons.send),
                 ),
               ],
@@ -172,10 +186,16 @@ class _QuickButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
 
-  const _QuickButton({required this.text, required this.onTap});
+  const _QuickButton({
+    required this.text,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(label: Text(text), onPressed: onTap);
+    return ActionChip(
+      label: Text(text),
+      onPressed: onTap,
+    );
   }
 }

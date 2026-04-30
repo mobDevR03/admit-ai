@@ -2,24 +2,23 @@ class CurrencyUtils {
   static String getSymbol(String country) {
     final c = country.toLowerCase();
 
-    if (['uk', 'united kingdom'].contains(c)) {
-      return '£';
-    }
+    const map = {
+      'uk': '£',
+      'united kingdom': '£',
 
-    if (c == 'switzerland') {
-      return 'CHF';
-    }
+      'switzerland': 'CHF',
 
-    // Все остальные твои европейские страны → евро
-    if (['germany', 'france', 'finland'].contains(c)) {
-      return '€';
-    }
+      'germany': '€',
+      'france': '€',
+      'finland': '€',
 
-    if (['usa', 'united states'].contains(c)) {
-      return '\$';
-    }
+      'usa': '\$',
+      'united states': '\$',
+      'canada': '\$',
+      'australia': '\$',
+    };
 
-    return '\$';
+    return map[c] ?? '\$';
   }
 
   static String formatTuition({

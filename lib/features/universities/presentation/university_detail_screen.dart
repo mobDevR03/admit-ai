@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../core/services/user_university_service.dart';
+
 import '../../../core/models/university.dart';
-import '../../../core/utils/currency_utils.dart';
 import '../../../core/models/user_profile.dart';
+import '../../../core/services/user_university_service.dart';
+import '../../../core/utils/currency_utils.dart';
 
 class UniversityDetailScreen extends StatefulWidget {
   final UserProfile userProfile;
@@ -15,37 +16,16 @@ class UniversityDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<UniversityDetailScreen> createState() => _UniversityDetailScreenState();
+  State<UniversityDetailScreen> createState() =>
+      _UniversityDetailScreenState();
 }
 
 class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
-  final UserUniversityService _service = UserUniversityService();
+  final _service = UserUniversityService();
   final String _userId = 'test_user';
 
   bool _isSaved = false;
   bool _isLoading = true;
-
-  String _buildUniversityDescription() {
-    final exams = widget.userProfile.exams;
-
-    final hasDuolingo = exams.contains('Duolingo');
-    final hasIelts = exams.contains('IELTS');
-    final hasToefl = exams.contains('TOEFL');
-
-    if (hasDuolingo && widget.university.duolingo <= 105) {
-      return '${widget.university.name} may be a good match because it accepts Duolingo and its listed requirement is reachable for many applicants.';
-    }
-
-    if (hasIelts && widget.university.ielts <= 6.5) {
-      return '${widget.university.name} may be a good match because it accepts IELTS and the listed IELTS requirement is moderate.';
-    }
-
-    if (hasToefl && widget.university.toefl <= 80) {
-      return '${widget.university.name} may be a good match because it accepts TOEFL and the listed TOEFL requirement is moderate.';
-    }
-
-    return '${widget.university.name} can still be considered, but you should compare its English test requirements with your current exam plan before adding it to your final shortlist.';
-  }
 
   @override
   void initState() {
@@ -59,14 +39,76 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
       university: widget.university,
     );
 
+    if (!mounted) return;
+
     setState(() {
       _isSaved = isSaved;
       _isLoading = false;
     });
   }
 
+  String _buildSmartDescription() {
+    final exams = widget.userProfile.exams;
+
+    final hasDuolingo = exams.contains('Duolingo');
+    final hasIelts = exams.contains('IELTS');
+    final hasToefl = exams.contains('TOEFL');
+
+    if (hasDuolingo && widget.university.duolingo <= 105) {
+      return '${widget.university.name} is a strong match because its Duolingo requirement is realistic for your profile.';
+    }
+
+    if (hasIelts && widget.university.ielts <= 6.5) {
+      return '${widget.university.name} is a good option with a moderate IELTS requirement.';
+    }
+
+    if (hasToefl && widget.university.toefl <= 80) {
+      return '${widget.university.name} fits your TOEFL plan well.';
+    }
+
+    return 'You can consider ${widget.university.name}, but compare requirements carefully.';
+  }
+
+  Future<void> _toggleSave() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    if (_isSaved) {
+      await _service.removeUniversity(
+        userId: _userId,
+        university: widget.university,
+      );
+    } else {
+      await _service.saveUniversity(
+        userId: _userId,
+        university: widget.university,
+      );
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _isSaved = !_isSaved;
+      _isLoading = false;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isSaved ? 'Saved to your plan' : 'Removed from your plan',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final tuition = CurrencyUtils.formatTuition(
+      country: widget.university.country,
+      tuition: widget.university.tuition,
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.university.name),
@@ -76,7 +118,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: Stack(
@@ -87,6 +128,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                     width: double.infinity,
                     fit: BoxFit.cover,
                   ),
+
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
@@ -101,6 +143,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                       ),
                     ),
                   ),
+
                   Positioned(
                     left: 18,
                     right: 18,
@@ -113,8 +156,6 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
-                        height: 1.15,
-                        letterSpacing: -0.4,
                       ),
                     ),
                   ),
@@ -122,14 +163,14 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             Text(
               widget.university.description,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
-                height: 1.45,
-                color: Colors.grey.shade600,
+                height: 1.4,
+                color: Colors.grey,
               ),
             ),
 
@@ -137,11 +178,7 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
             const Text(
               'Requirements',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
 
             const SizedBox(height: 12),
@@ -158,45 +195,25 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
             const SizedBox(height: 30),
 
-            Text(
-              'Key info',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
             _InfoRow(title: 'City', value: widget.university.city),
-            
-            _InfoRow(
-              title: 'Tuition',
-              value: CurrencyUtils.formatTuition(
-                country: widget.university.country,
-                tuition: widget.university.tuition,
-              ),
-            ),
-
+            _InfoRow(title: 'Tuition', value: tuition),
             _InfoRow(
               title: 'Acceptance rate',
-              value: '${(widget.university.acceptanceRate * 100).toStringAsFixed(0)}%',
+              value:
+                  '${(widget.university.acceptanceRate * 100).toStringAsFixed(0)}%',
             ),
 
+            const SizedBox(height: 20),
+
             const Text(
-              'About university',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.2,
-              ),
+              'AI Insight',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
 
             const SizedBox(height: 10),
 
             Text(
-              _buildUniversityDescription(),
+              _buildSmartDescription(),
               style: const TextStyle(fontSize: 15),
             ),
 
@@ -204,88 +221,16 @@ class _UniversityDetailScreenState extends State<UniversityDetailScreen> {
 
             SizedBox(
               width: double.infinity,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: _isSaved ? Colors.blueGrey : Colors.blue,
-                  boxShadow: [
-                    BoxShadow(
-                      color: (_isSaved ? Colors.blueGrey : Colors.blue)
-                          .withValues(alpha: 0.25),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(14),
-                    onTap: _isLoading
-                        ? null
-                        : () async {
-                            if (_isSaved) {
-                              await _service.removeUniversity(
-                                userId: _userId,
-                                university: widget.university,
-                              );
-                            } else {
-                              await _service.saveUniversity(
-                                userId: _userId,
-                                university: widget.university,
-                              );
-                            }
-
-                            setState(() {
-                              _isSaved = !_isSaved;
-                            });
-
-                            if (!context.mounted) return;
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  _isSaved
-                                      ? 'Saved to your plan'
-                                      : 'Removed from your plan',
-                                ),
-                              ),
-                            );
-                          },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            _isSaved ? Icons.bookmark : Icons.add,
-                            color: Colors.white,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            _isLoading
-                                ? 'Loading...'
-                                : _isSaved
-                                    ? 'Saved'
-                                    : 'Save to plan',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+              child: ElevatedButton(
+                onPressed: _toggleSave,
+                child: _isLoading
+                    ? const Text('Loading...')
+                    : Text(_isSaved ? 'Saved' : 'Save to plan'),
               ),
             ),
-
           ],
         ),
-      )
+      ),
     );
   }
 }
@@ -298,10 +243,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 8,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.blue.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),

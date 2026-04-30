@@ -58,7 +58,7 @@ class _CountryScreenState extends State<CountryScreen> {
                     title: Text(country),
                     value: country,
                     groupValue: _selectedCountry,
-                    onChanged: (value) {
+                    onChanged: (String? value) {
                       setState(() {
                         _selectedCountry = value;
                       });

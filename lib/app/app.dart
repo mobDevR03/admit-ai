@@ -16,7 +16,13 @@ class AdmitAIApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'AdmitAI',
-      theme: AppTheme.light,
+      theme: ThemeData(
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFE6D6FF),
+          foregroundColor: Colors.black,
+          elevation: 0,
+        ),
+      ),
       home: const OnboardingFlow(),
     );
   }
@@ -45,7 +51,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
     _screens = [
       HomeScreen(userProfile: widget.userProfile),
-      const SavedUniversitiesScreen(),
+      SavedUniversitiesScreen(userProfile: widget.userProfile),
       ChatScreen(userProfile: widget.userProfile),
       UniversitiesScreen(userProfile: widget.userProfile),
       ProfileScreen(

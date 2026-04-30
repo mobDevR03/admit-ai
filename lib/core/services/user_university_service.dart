@@ -9,49 +9,62 @@ class UserUniversityService {
     required String userId,
     required University university,
   }) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('saved_universities')
-        .doc(university.name)
-        .set({
-          'name': university.name,
-          'country': university.country,
-          'city': university.city,
-          'description': university.description,
-          'imageURL': university.imageUrl,
-          'Duolingo': university.duolingo,
-          'IELTS': university.ielts,
-          'TOEFL': university.toefl,
-          'tuition': university.tuition,
-          'acceptanceRate': university.acceptanceRate,
-          'savedAt': FieldValue.serverTimestamp(),
-        });
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved_universities')
+          .doc(university.name)
+          .set({
+        'name': university.name,
+        'country': university.country,
+        'city': university.city,
+        'description': university.description,
+        'imageURL': university.imageUrl,
+        'Duolingo': university.duolingo,
+        'IELTS': university.ielts,
+        'TOEFL': university.toefl,
+        'tuition': university.tuition,
+        'acceptanceRate': university.acceptanceRate,
+        'savedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error saving university: $e');
+    }
   }
 
   Future<void> removeUniversity({
     required String userId,
     required University university,
   }) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('saved_universities')
-        .doc(university.name)
-        .delete();
+    try {
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved_universities')
+          .doc(university.name)
+          .delete();
+    } catch (e) {
+      print('Error removing university: $e');
+    }
   }
 
   Future<bool> isUniversitySaved({
     required String userId,
     required University university,
   }) async {
-    final doc = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('saved_universities')
-        .doc(university.name)
-        .get();
+    try {
+      final doc = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('saved_universities')
+          .doc(university.name)
+          .get();
 
-    return doc.exists;
+      return doc.exists;
+    } catch (e) {
+      print('Error checking saved university: $e');
+      return false;
+    }
   }
 }

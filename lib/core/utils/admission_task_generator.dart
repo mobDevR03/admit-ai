@@ -139,7 +139,10 @@ class AdmissionTaskGenerator {
 
     // ================== GOAL-BASED ==================
 
-    if (goal == 'Engineering' || goal == 'CS') {
+    if (goal == 'Engineering' ||
+    goal == 'CS' ||
+    goal == 'IT' ||
+    goal == 'Data Science') {
       tasks.insert(
         0,
         AdmissionTask(
@@ -150,7 +153,7 @@ class AdmissionTaskGenerator {
       );
     }
 
-    if (goal == 'Business') {
+    if (goal == 'Business' || goal == 'Business Administration') {
       tasks.insert(
         0,
         AdmissionTask(

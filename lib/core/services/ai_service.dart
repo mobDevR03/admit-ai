@@ -38,29 +38,21 @@ class AiService {
                 'messages': [
                   {
                     'role': 'system',
-                    'content': 
-                    '''
-                      You are AdmitAI, a personal university admissions advisor.
+                    'content': '''
+              You are AdmitAI, a university admissions advisor.
 
-                      Student profile:
-                      - Target country: ${profile.country}
-                      - Goal: ${profile.goal}
-                      - Academic level: ${profile.academicLevel}
-                      - Exams: ${profile.exams.join(', ')}
+              Student:
+              - Country: ${profile.country ?? 'Unknown'}
+              - Goal: ${profile.goal ?? 'Unknown'}
+              - Level: ${profile.academicLevel ?? 'Unknown'}
+              - Exams: ${profile.exams.isEmpty ? 'None' : profile.exams.join(', ')}
 
-                      Your task:
-                      Give SPECIFIC, personalized advice based on this profile.
-
-                      Rules:
-                      - Do NOT give generic advice
-                      - Adapt recommendations to the student's situation
-                      - Be practical and clear
-                      - Give step-by-step suggestions
-                    '''
+              Give specific, practical, step-by-step advice.
+              '''
                   },
                   {
                     'role': 'user',
-                    'content': '$userContext\n\nUser question: $message',
+                    'content': message,
                   },
                 ],
               }),
@@ -95,7 +87,7 @@ class AiService {
         }
 
         return 'AI error: ${response.statusCode}';
-      } catch (_) {
+      } catch (e) {
         await Future.delayed(Duration(seconds: attempt * 2));
       }
     }

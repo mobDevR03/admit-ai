@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'university_detail_screen.dart';
-import '../../../core/models/user_profile.dart';
+
 import '../../../core/models/university.dart';
-import '../../../../core/services/university_service.dart';
+import '../../../core/models/user_profile.dart';
+import '../../../core/services/university_service.dart';
+import '../../../core/utils/currency_utils.dart';
+import 'university_detail_screen.dart';
 
 class UniversitiesScreen extends StatefulWidget {
   final UserProfile userProfile;
@@ -17,22 +19,17 @@ class UniversitiesScreen extends StatefulWidget {
 }
 
 class _UniversitiesScreenState extends State<UniversitiesScreen> {
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Universities'),
       ),
-      
       body: FutureBuilder<List<University>>(
         future: UniversityService().getUniversities(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -43,12 +40,16 @@ class _UniversitiesScreenState extends State<UniversitiesScreen> {
 
           final allUniversities = snapshot.data ?? [];
 
-          final filtered = allUniversities.where((u) {
-            if (widget.userProfile.country == null) return true;
-            if (widget.userProfile.country == 'Europe') {
-              return u.country != 'USA';
+          final filtered = allUniversities.where((university) {
+            final country = widget.userProfile.country;
+
+            if (country == null) return true;
+
+            if (country == 'Europe') {
+              return university.country != 'USA';
             }
-            return u.country == widget.userProfile.country;
+
+            return university.country == country;
           }).toList();
 
           return ListView(
@@ -67,50 +68,40 @@ class _UniversitiesScreenState extends State<UniversitiesScreen> {
 
               if (filtered.isEmpty)
                 const Text('No universities found')
-              else ...[
-                ...filtered.map((university) {
-                  return Padding(
+              else
+                ...filtered.map(
+                  (university) => Padding(
                     padding: const EdgeInsets.only(bottom: 16),
-                    child: _UniversityCard(university: university),
-                  );
-                }),
-              ],
+                    child: _UniversityCard(
+                      university: university,
+                      userProfile: widget.userProfile,
+                    ),
+                  ),
+                ),
             ],
           );
         },
       ),
-
     );
   }
 }
 
 class _UniversityCard extends StatelessWidget {
   final University university;
+  final UserProfile userProfile;
 
   const _UniversityCard({
     required this.university,
+    required this.userProfile,
   });
-
-  String getCurrencySymbol(String country) {
-    switch (country) {
-      case 'USA':
-        return '\$';
-      case 'UK':
-        return '£';
-      case 'Netherlands':
-      case 'Germany':
-      case 'France':
-      case 'Spain':
-        return '€';
-      case 'Switzerland':
-        return 'CHF ';
-      default:
-        return '\$';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final tuition = CurrencyUtils.formatTuition(
+      country: university.country,
+      tuition: university.tuition,
+    );
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -118,32 +109,23 @@ class _UniversityCard extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => UniversityDetailScreen(
               university: university,
-              userProfile: UserProfile(
-                country: 'USA',
-                goal: 'CS',
-                academicLevel: 'Not selected',
-                level: 'Not selected',
-                exams: ['IELTS', 'SAT'],
-              ),
-            )
+              userProfile: userProfile,
+            ),
           ),
         );
       },
-
       child: Container(
         height: 260,
-        margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
           ],
         ),
-  
         child: ClipRRect(
           borderRadius: BorderRadius.circular(22),
           child: Stack(
@@ -163,8 +145,8 @@ class _UniversityCard extends StatelessWidget {
                       end: Alignment.bottomCenter,
                       colors: [
                         Colors.transparent,
-                        Colors.black.withOpacity(0.6),
-                        Colors.black.withOpacity(0.9),
+                        Colors.black.withValues(alpha: 0.6),
+                        Colors.black.withValues(alpha: 0.9),
                       ],
                     ),
                   ),
@@ -203,19 +185,15 @@ class _UniversityCard extends StatelessWidget {
 
                     Wrap(
                       spacing: 6,
+                      runSpacing: 6,
                       children: [
                         if (university.duolingo > 0)
-                          _InfoChip(label: "Duolingo ${university.duolingo}"),
-
+                          _InfoChip(label: 'Duolingo ${university.duolingo}'),
                         if (university.ielts > 0)
-                          _InfoChip(label: "IELTS ${university.ielts}"),
-
+                          _InfoChip(label: 'IELTS ${university.ielts}'),
                         if (university.toefl > 0)
-                          _InfoChip(label: "TOEFL ${university.toefl}"),
-
-                        _InfoChip(
-                          label: "💰 ${getCurrencySymbol(university.country)}${university.tuition}",
-                        ),
+                          _InfoChip(label: 'TOEFL ${university.toefl}'),
+                        _InfoChip(label: tuition),
                       ],
                     ),
                   ],
@@ -225,7 +203,6 @@ class _UniversityCard extends StatelessWidget {
           ),
         ),
       ),
-
     );
   }
 }
@@ -245,7 +222,7 @@ class _InfoChip extends StatelessWidget {
         vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.08),
+        color: Colors.blue.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(

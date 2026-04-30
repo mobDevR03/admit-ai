@@ -18,6 +18,7 @@ class WelcomeScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Spacer(),
+
               const Text(
                 'Welcome to AdmitAI',
                 style: TextStyle(
@@ -25,7 +26,9 @@ class WelcomeScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 16),
+
               const Text(
                 'Your AI-powered admission assistant for studying abroad.',
                 style: TextStyle(
@@ -33,7 +36,9 @@ class WelcomeScreen extends StatelessWidget {
                   color: Colors.black54,
                 ),
               ),
+
               const Spacer(),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
