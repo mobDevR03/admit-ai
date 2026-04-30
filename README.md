@@ -21,7 +21,28 @@ AdmitAI simplifies the admission journey by providing a structured platform for 
 - GitHub
 
 ## Screenshots
-(coming soon)
+
+### Home
+![Home 1](assets/screenshots/homeScreen_1.png)
+![Home 2](assets/screenshots/homeScreen_2.png)
+
+### Roadmap / Progress
+![Roadmap](assets/screenshots/roadMapScreen.png)
+
+### Universities
+![Universities](assets/screenshots/universitiesScreen.png)
+![Saved Universities](assets/screenshots/universitiesSavedScreen.png)
+![My Universities](assets/screenshots/myUniversitiesScreen.png)
+
+### University Details
+![Details](assets/screenshots/universitiesDetailedScreen.png)
+
+### AI Assistant
+![AI Chat](assets/screenshots/AIChatScreen.png)
+
+### Profile
+![Profile 1](assets/screenshots/profileScreen_1.png)
+![Profile 2](assets/screenshots/profileScreen_2.png)
 
 ## Demo
 (coming soon)
